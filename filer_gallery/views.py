@@ -4,11 +4,14 @@ from filer_gallery import settings as filer_gallery_settings
 
 try:
     from django.views.generic import ListView
-    from django.views.generic.dates import ArchiveIndexView, YearArchiveView, MonthArchiveView, DayArchiveView
+    from django.views.generic.dates import (ArchiveIndexView, YearArchiveView,
+            MonthArchiveView, DayArchiveView)
 except ImportError:
-    from cbv import ListView, ArchiveIndexView, YearArchiveView, MonthArchiveView, DayArchiveView
-    
+    from cbv import (ListView, ArchiveIndexView, YearArchiveView,
+            MonthArchiveView, DayArchiveView)
+
 from categories.views import get_category_for_path
+
 
 class ConfigMixin(object):
     def get_context_data(self, **kwargs):
@@ -16,12 +19,13 @@ class ConfigMixin(object):
         context['ORBIT_CONFIG'] = simplejson.dumps(filer_gallery_settings.ORBIT_CONFIG)
         context['FILER_GALLERY_DISPLAY_SIZE'] = filer_gallery_settings.FILER_GALLERY_DISPLAY_SIZE
         return context
-        
+
+
 class CategoryAllRelatedList(ListView, ConfigMixin):
-    
+
     path_field = 'category_path'
     category_field = 'category'
-    
+
     def get_queryset(self):
         queryset = super(CategoryAllRelatedList, self).get_queryset()
         category = get_category_for_path(self.kwargs[self.path_field])
@@ -50,14 +54,16 @@ class CategoryAllRelatedList(ListView, ConfigMixin):
                                                     )
         names.extend(super(CategoryAllRelatedList, self).get_template_names())
         return names
-        
+
     def get_context_data(self, **kwargs):
         context = super(CategoryAllRelatedList, self).get_context_data(**kwargs)
         context['category'] = get_category_for_path(self.kwargs['category_path'])
         return context
 
+
 class ImageViaGalleryCategoryList(CategoryAllRelatedList):
     category_field = 'gallery__category'
+
 
 class GalleryArchiveIndexView(ArchiveIndexView, ConfigMixin):
     def get_context_data(self, **kwargs):
@@ -66,18 +72,20 @@ class GalleryArchiveIndexView(ArchiveIndexView, ConfigMixin):
         context['SKITTER_CONFIG'] = simplejson.dumps(filer_gallery_settings.SKITTER_CONFIG)
         context['FILER_GALLERY_DISPLAY_SIZE'] = filer_gallery_settings.FILER_GALLERY_DISPLAY_SIZE
         return context
-    
+
+
 class GalleryYearArchiveView(YearArchiveView, ConfigMixin):
-    
+
     make_object_list = True
-    
+
     def get_context_data(self, **kwargs):
         context = super(GalleryYearArchiveView, self).get_context_data(**kwargs)
         context['ORBIT_CONFIG'] = simplejson.dumps(filer_gallery_settings.ORBIT_CONFIG)
         context['SKITTER_CONFIG'] = simplejson.dumps(filer_gallery_settings.SKITTER_CONFIG)
         context['FILER_GALLERY_DISPLAY_SIZE'] = filer_gallery_settings.FILER_GALLERY_DISPLAY_SIZE
         return context
-    
+
+
 class GalleryMonthArchiveView(MonthArchiveView, ConfigMixin):
     def get_context_data(self, **kwargs):
         context = super(GalleryMonthArchiveView, self).get_context_data(**kwargs)
@@ -85,7 +93,8 @@ class GalleryMonthArchiveView(MonthArchiveView, ConfigMixin):
         context['SKITTER_CONFIG'] = simplejson.dumps(filer_gallery_settings.SKITTER_CONFIG)
         context['FILER_GALLERY_DISPLAY_SIZE'] = filer_gallery_settings.FILER_GALLERY_DISPLAY_SIZE
         return context
-    
+
+
 class GalleryDayArchiveView(DayArchiveView, ConfigMixin):
     def get_context_data(self, **kwargs):
         context = super(GalleryDayArchiveView, self).get_context_data(**kwargs)
