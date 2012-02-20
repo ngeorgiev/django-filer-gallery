@@ -25,7 +25,7 @@ class GalleryImage(models.Model):
     gallery = models.ForeignKey(Gallery, related_name="images")
     pub_date = models.DateTimeField(default=datetime.now)
     image = FilerImageField()
-    order = models.IntegerField(default=0)
+    order = models.IntegerField(default=1)
 
     class Meta:
         ordering = ['order']
