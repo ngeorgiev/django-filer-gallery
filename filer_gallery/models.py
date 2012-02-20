@@ -10,7 +10,7 @@ from filer.fields.image import FilerImageField
 class Gallery(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField()
-    category = models.ForeignKey('categories.Category')
+    category = models.ForeignKey('categories.Category', null=True, blank=True)
     pub_date = models.DateTimeField(default=datetime.now)
 
     class Meta:
