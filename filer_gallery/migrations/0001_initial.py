@@ -13,7 +13,6 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('slug', self.gf('django.db.models.fields.SlugField')(max_length=50, db_index=True)),
-            ('category', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['categories.Category'])),
             ('pub_date', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now)),
         ))
         db.send_create_signal('filer_gallery', ['Gallery'])
@@ -21,11 +20,10 @@ class Migration(SchemaMigration):
         # Adding model 'GalleryImage'
         db.create_table('filer_gallery_galleryimage', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('gallery', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['filer_gallery.Gallery'])),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('category', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['categories.Category'], null=True, blank=True)),
+            ('gallery', self.gf('django.db.models.fields.related.ForeignKey')(related_name='images', to=orm['filer_gallery.Gallery'])),
             ('pub_date', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now)),
             ('image', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['filer.Image'])),
+            ('order', self.gf('django.db.models.fields.IntegerField')(default=1)),
         ))
         db.send_create_signal('filer_gallery', ['GalleryImage'])
 
@@ -68,27 +66,6 @@ class Migration(SchemaMigration):
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
             'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
-        },
-        'categories.category': {
-            'Meta': {'ordering': "('tree_id', 'lft')", 'unique_together': "(('parent', 'name'),)", 'object_name': 'Category'},
-            'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'alternate_title': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '100', 'blank': 'True'}),
-            'alternate_url': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
-            'description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'level': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
-            'lft': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
-            'meta_extra': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
-            'meta_keywords': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'order': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'parent': ('mptt.fields.TreeForeignKey', [], {'blank': 'True', 'related_name': "'children'", 'null': 'True', 'to': "orm['categories.Category']"}),
-            'rght': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'}),
-            'thumbnail': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'thumbnail_height': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'thumbnail_width': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'tree_id': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'})
         },
         'contenttypes.contenttype': {
             'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
@@ -143,20 +120,18 @@ class Migration(SchemaMigration):
         },
         'filer_gallery.gallery': {
             'Meta': {'object_name': 'Gallery'},
-            'category': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['categories.Category']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'pub_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         'filer_gallery.galleryimage': {
-            'Meta': {'object_name': 'GalleryImage'},
-            'category': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['categories.Category']", 'null': 'True', 'blank': 'True'}),
-            'gallery': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['filer_gallery.Gallery']"}),
+            'Meta': {'ordering': "['order']", 'object_name': 'GalleryImage'},
+            'gallery': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'images'", 'to': "orm['filer_gallery.Gallery']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'image': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['filer.Image']"}),
-            'pub_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+            'order': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
+            'pub_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'})
         }
     }
 
