@@ -10,7 +10,6 @@ from filer.fields.image import FilerImageField
 class Gallery(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField()
-    category = models.ForeignKey('categories.Category', null=True, blank=True)
     pub_date = models.DateTimeField(default=datetime.now)
 
     class Meta:
@@ -23,8 +22,8 @@ class Gallery(models.Model):
 
 class GalleryImage(models.Model):
     gallery = models.ForeignKey(Gallery)
-    title = models.CharField(max_length=255)
-    category = models.ForeignKey('categories.Category', null=True, blank=True)
+    title = models.CharField(max_length=255, null=True, blank=True,
+            help_text=_('The image name will be used if no title is provided'))
     pub_date = models.DateTimeField(default=datetime.now)
     image = FilerImageField()
 
@@ -39,3 +38,7 @@ class GalleryImage(models.Model):
         if not self.pk:
             self.pub_date = self.image.date_taken
         super(GalleryImage, self).save(*args, **kwargs)
+
+    @property
+    def name(self):
+        return self.title if self.title else u"%s" % self.image.name
