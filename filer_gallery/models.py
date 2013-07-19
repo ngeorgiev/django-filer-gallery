@@ -3,7 +3,9 @@ from datetime import datetime
 
 from django.db import models
 from django.db.models import Max
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
+
+from cms.models.pluginmodel import CMSPlugin
 
 from filer.fields.image import FilerImageField
 
@@ -43,3 +45,10 @@ class GalleryImage(models.Model):
             last = self.gallery.images.aggregate(Max('order'))['order__max'] or 0
             self.order = last + 1
         super(GalleryImage, self).save(*args, **kwargs)
+
+
+class FilerGalleryPluginModel(CMSPlugin):
+    gallery = models.ForeignKey(Gallery, verbose_name=_('Gallery'))
+
+    def __unicode__(self):
+        return unicode(self.gallery)
